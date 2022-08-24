@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content=
+		"width=device-width, initial-scale=1.0">
+
+	<title>Speech to Text</title>
+</head>
+
+<body style="background-color:#607D8B; width:950px; height:900px;">
+  <button id="start" style="position:relative; left:560px; top:400px; width:15%; height:5vh;  border-radius: 15px;">Start</button>
+    <button id="connect" style="position:relative; left:610px; top:400px; width:15%; height:5vh;  border-radius: 15px;">Connect</button>
+	<p class="p" style="width:50%; height:40vh; background-color: rgb(239,239,239); position:relative; border-radius: 15px; left:500px; top:50px"></p>
+  <h1 style=" position:relative; left:555px; top:-300px;">Speech To Text Converter</h1>
+	<script>
+
+    var start = document.getElementById('start');
+    var connect = document.getElementById('connect');
+    var res;
+
+  //We use the SpeechRecognition object to convert the speech into text and then display the text on the screen.
+  //We also added WebKit Speech Recognition to perform speech recognition in Google chrome and Apple safari.
+		window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+		const recognition = new SpeechRecognition();
+    //Interim results are results that are not yet final
+	 //recognition.interimResults = true;
+   recognition.lang= 'en-US';
+
+   var output = document.querySelector('.p');
+    start.onclick = function() {
+      recognition.start();
+    }
+
+    recognition.onresult = function(event){
+      res = event.results[0][0].transcript;
+      output.textContent = 'Result received: ' + res + '.'; }
+
+    recognition.onspeechend = function() {
+      recognition.stop();
+    }
+
+    //Shows connected devices
+    connect.addEventListener('click', () => {
+    const usbVendorId = 0xABCD;
+    navigator.serial.requestPort({ filters: [{ usbVendorId }]}).then((port) => {
+      // Connect to `port` or add it to the list of available ports.
+    }).catch((e) => {
+      // The user didn't select a port.
+    });
+    });
+
+
+    //**Note: await must be inside async function or the buttons won't work
+
+    //define the baudRate
+    async function baudrate(){
+    await port.open({ baudRate: 9600 });
+    }
+    baudrate();
+
+    //writing data to the ports
+    async function writer(){
+    const encoder = new TextEncoder();
+    const writer = port.writable.getWriter();
+    await writer.write(res);
+    // releaseLock() is required for the serial port to be closed later.
+    writer.releaseLock();
+    }
+    writer();
+
+
+	</script>
+
+</body>
+
+</html>
